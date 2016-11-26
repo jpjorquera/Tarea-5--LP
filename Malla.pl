@@ -78,3 +78,34 @@ insert(X,[],[X]).
 % eg: Aprobados = [mate1, fis100, ...]
 %     Cursar = feria
 rama(Aprobados, Cursar, L):- listareq(Cursar, Lista), set(Lista, L1), sortear(L1, L2), subtract(L2, Aprobados, L).
+
+% Agrega el elemento a la lista segun corresponda
+agregar(Elemento, Lista, L):-
+	member(Elemento, Lista),!, L=Lista;
+	append([Elemento],Lista,L).
+
+% Obtiene todos los ramos posibles que abren los ya aprobados
+% Caso base
+abren([], []).
+
+% Paso recursivo
+abren([H|T], L):- findall(X, prerrequisitos(H, X), L1), abren(T, L2), append(L1, L2, L3), findall(Y, prerrequisitos(Y), L4), append(L4, L3,L).
+
+% Elimina los aprobados de los posibles
+elim_aprob([], L1, L2):- L2 = L1, !.
+
+% Si pertenece, eliminar
+elim_aprob([H|T], L, L1):- member(H, L), delete(L, H, L2), elim_aprob(T, L2, L1), !.
+
+% Si no pertenece continuar
+elim_aprob([H|T], L, L1):- not(member(H,L)), elim_aprob(T, L, L1).
+
+% Verifica si esta contenida una lista en otra
+% Caso base
+contenido([], _):- !.
+
+% Paso Recursivo
+contenido([H|T], Ap) :- member(H, Ap), contenido(T, Ap), !.
+
+% Entrega una lista con los ramos posibles a partir de un alumno
+posibles(Aprobados, L):- abren(Aprobados, Lista), set(Lista, L1), elim_aprob(Aprobados, L1, L).
