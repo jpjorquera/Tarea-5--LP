@@ -86,10 +86,11 @@ agregar(Elemento, Lista, L):-
 
 % Obtiene todos los ramos posibles que abren los ya aprobados
 % Caso base
-abren([], []).
+abren([], L):- findall(Y, prerrequisitos(Y), L).
+
 
 % Paso recursivo
-abren([H|T], L):- findall(X, prerrequisitos(H, X), L1), abren(T, L2), append(L1, L2, L3), findall(Y, prerrequisitos(Y), L4), append(L4, L3,L).
+abren([H|T], L):- findall(X, prerrequisitos(H, X), L1), abren(T, L2), append(L1, L2, L).
 
 % Elimina los aprobados de los posibles
 elim_aprob([], L1, L2):- L2 = L1, !.
@@ -116,10 +117,20 @@ cumple(_, [], []):- !.
 cumple(Ap, [H|T], L):- prerrequisitos(H), cumple(Ap, T, L1), append([H], L1, L), !.
 
 % Revisar prerrequisitos
-cumple(Ap, [H|T], L):- findall(X, prerrequisitos(X, H), L1), L1 \= [],contenido(L1, Ap), cumple(Ap, T, L2), append([H], L2, L), !.
+cumple(Ap, [H|T], L):- findall(X, prerrequisitos(X, H), L1), L1 \= [], contenido(L1, Ap), cumple(Ap, T, L2), append([H], L2, L), !.
 
 % Al terminar devolver vacio
 cumple(_, _, []):- !.
 
 % Entrega una lista con los ramos posibles a partir de un alumno
 posibles(Aprobados, L):- abren(Aprobados, Lista), set(Lista, L1), elim_aprob(Aprobados, L1, L2), cumple(Aprobados, L2, L).
+
+leer(L):-
+	 open('Ejemplos.txt',read,Str),
+         read(Str,P),
+         read(Str,S),
+         read(Str,T),
+         read(Str,C),
+	 read(Str,Q),
+         close(Str),
+         L = [P,S,T,C,Q].
