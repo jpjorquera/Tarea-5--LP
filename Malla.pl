@@ -107,5 +107,19 @@ contenido([], _):- !.
 % Paso Recursivo
 contenido([H|T], Ap) :- member(H, Ap), contenido(T, Ap), !.
 
+% Revisa si los ramos cumplen los requerimientos en Ap, para sino
+% eliminarlos
+% Caso base
+cumple(_, [], []):- !.
+
+% Primer año
+cumple(Ap, [H|T], L):- prerrequisitos(H), cumple(Ap, T, L1), append([H], L1, L), !.
+
+% Revisar prerrequisitos
+cumple(Ap, [H|T], L):- findall(X, prerrequisitos(X, H), L1), L1 \= [],contenido(L1, Ap), cumple(Ap, T, L2), append([H], L2, L), !.
+
+% Al terminar devolver vacio
+cumple(_, _, []):- !.
+
 % Entrega una lista con los ramos posibles a partir de un alumno
-posibles(Aprobados, L):- abren(Aprobados, Lista), set(Lista, L1), elim_aprob(Aprobados, L1, L).
+posibles(Aprobados, L):- abren(Aprobados, Lista), set(Lista, L1), elim_aprob(Aprobados, L1, L2), cumple(Aprobados, L2, L).
